@@ -8,11 +8,12 @@ import { useState } from "react"
 export function RecipeListing({rating = 0, title, desc, tags, image, saved,}: 
     {rating: number | undefined, title: string | undefined, desc: string | undefined, tags: string[], image: StaticImageData | string, saved: boolean }){
       const [isSaved, setSaved] = useState(saved)
+      
   
       return(
-        <div className="w-full p-4 h-48 bg-black hover:bg-slate-500/5 rounded-lg shadow-md shadow-black/40 flex justify-between gap-8 items-center text-white group">
-          <div className='h-40 w-40 shrink-0 rounded-lg bg-slate-700 overflow-hidden relative'>
-            <Image src={image} layout="fill" objectFit="contain" alt="Breakfast Photo" className="opacity-70 group-hover:opacity-90 transition-opacity ease-in"/>
+        <div className="w-full p-4 md:h-48 bg-black hover:bg-slate-500/5 rounded-lg shadow-md shadow-black/40 flex flex-col md:flex-row md:justify-between gap-8 items-center text-white group">
+          <div className='h-64 w-full md:w-40 md:h-40 shrink-0 rounded-lg overflow-hidden relative cursor-pointer'>
+            <Image src={image} layout="fill" objectFit="cover" alt="Breakfast Photo"/>
           </div>
           <div className="h-fit w-full items-center">
             <div className="flex justify-between items-center">
@@ -29,7 +30,7 @@ export function RecipeListing({rating = 0, title, desc, tags, image, saved,}:
                 {isSaved ? <>Saved <FaBookmark/></> : <>Save <FaRegBookmark/></>}
                 </Button>
             </div>
-          </div>
+          </div>          
         </div>
       )
   }

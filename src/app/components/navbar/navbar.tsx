@@ -1,8 +1,14 @@
-import { FaPizzaSlice } from "react-icons/fa"
+"use client"
+
+import { FaPizzaSlice, FaBars } from "react-icons/fa"
+import { BsX } from "react-icons/bs"
 import Button from "../generic/button"
+import { useState } from "react"
 
 
 export default function NavBar(){
+    const [showMobile, setShowMobile] = useState(true)
+
     return(
         <div className="bg-black/80 sticky top-0 z-20 backdrop-blur-xl">
             <div className="w-full flex bg-slate-700/50 ">
@@ -11,7 +17,7 @@ export default function NavBar(){
                         <FaPizzaSlice className="h-full w-8 fill-vermilion-400"/>
                         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-vermilion-400 to-vermilion-500">Recipefy</h1>
                     </div>
-                    <div className="flex text-lg gap-4">
+                    <div className="hidden text-lg gap-4 md:flex">
                         <Button className="text-white bg-slate-200/5 active:bg-slate-100/5 hover:bg-slate-200/10" onClick={undefined}>
                             Recipes
                         </Button>
@@ -22,7 +28,18 @@ export default function NavBar(){
                             Ingredient Picker
                         </Button>
                     </div>
+                    <div className="md:hidden">
+                        <FaBars className="h-10 w-10 fill-white cursor-pointer hover:fill-vermilion-400 active:opacity-80" onClick={() => setShowMobile(true)}/>
+                    </div>
+                    <div className={`${showMobile ? "" : "translate-x-full"} absolute w-screen h-screen bg-black left-0 top-0 md:hidden transition-all z-50 ease-in-out`}>
+                    <div id="mobile-header" className="flex flex-row-reverse w-full"> 
+                        <BsX className="fill-white w-16 h-16 cursor-pointer hover:fill-vermilion-400" onClick={() => setShowMobile(false)}/>
+                    </div>
+                    <div id="mobile-body">XDDDDDDDDDDDDDDDDD</div>
+                    </div>
                 </div>
+                
+                
             </div>
         </div>
     )

@@ -13,35 +13,46 @@ import greekMeatLoaf from '../../public/media/recipes/greekMeatLoaf.jpg'
 import vanillaIceCream from '../../public/media/recipes/vanillaIceCream.jpg'
 import { useState } from 'react'
 import { RecipeListing } from './components/generic/recipeListing'
+import { Input } from 'postcss'
+import SearchBar from './components/generic/searchBar'
 
 export default function Home() {
   return (
     <main className="flex flex-col m-auto gap-4">
       <section id="header-section" className='max-w-7xl bg-black/90 m-auto w-full p-8 rounded-xl mt-4 shadow-md shadow-black/40'>
-        <div className="p-8 pb-14 flex justify-between">
+        <div className="sm:p-8 pb-14 flex justify-between">
           <h1 className="text-5xl text-white"> Browse <span className="text-vermilion-400">tastiest</span> recipes. </h1>
         </div>
-        <div className="grid grid-cols-3 gap-10 w-fit m-auto justify-around select-none pb-10">
-          <div className="w-80 h-80 bg-slate-700/30 rounded-lg flex cursor-pointer text-white/70 hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
+        <div className='w-full overflow-x-auto scroll'>
+
+        <div className="relative w-fit left-0 flex gap-10 pt-3 overflow-x-auto m-auto justify-around select-none pb-10">
+          <div className="w-80 h-80 shrink-0 bg-slate-700/30 rounded-lg flex cursor-pointer text-white/70 hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
             <h2 className="text-3xl font-semibold  self-center m-auto flex gap-2 z-10 group-hover:text-vermilion-400"> <FaMugHot/> Breakfast</h2>
             <Image src={breakfast} layout="fill" objectFit="contain" alt="Breakfast Photo" className="opacity-60 group-hover:opacity-50"/>
           </div>
-          <div className="w-80 h-80 bg-slate-600/30 rounded-lg flex cursor-pointer text-white/70 hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
+          <div className="w-80 h-80 shrink-0 bg-slate-600/30 rounded-lg flex cursor-pointer text-white/70 hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
             <h2 className="text-3xl font-semibold self-center m-auto flex gap-2 z-10 group-hover:text-vermilion-400"> <FaHamburger/> Lunch</h2>
             <Image src={lunch} layout="fill" objectFit="contain" alt="Breakfast Photo" className="opacity-60 group-hover:opacity-50"/>
           </div>
-          <div className="w-80 h-80 bg-slate-600/30 rounded-lg flex cursor-pointer text-white/70  hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
+          <div className="w-80 h-80 shrink-0 bg-slate-600/30 rounded-lg flex cursor-pointer text-white/70  hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
             <h2 className="text-3xl font-semibold self-center m-auto flex gap-2 z-10 group-hover:text-vermilion-400"> <FaCookieBite/> Desserts</h2>
             <Image src={dessert} layout="fill" objectFit="contain" alt="Breakfast Photo" className="opacity-60 group-hover:opacity-50"/>
           </div>
         </div>
+        </div>
       </section>
 
-      <section id="top-picks-section" className='max-w-7xl bg-black/90  m-auto w-full p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
-        <div className="p-8 pb-14 flex flex-col gap-5">
-          <h1 className="text-3xl text-white flex gap-2" > <FaFireAlt className="opacity-80 fill-vermilion-400"/> Latest recipes</h1>
-          <p className="text-2xl font-thin text-white/60 flex gap-2" > Our latest recipes, we try to add new ones daily!</p>
-          <div className="w-full p-5 bg-slate-800/20 flex flex-col gap-4">
+      <section id="searchbar-section" className='max-w-7xl bg-black/90  m-auto w-full sm:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
+        <SearchBar/>
+      </section>
+
+      <section id="top-picks-section" className='max-w-7xl bg-black/90  m-auto w-full sm:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
+        <div className="lg:p-8 pb-14 flex flex-col gap-5">
+          <div className="p-8">
+            <h1 className="text-3xl text-white flex gap-2 pb-2" > <FaFireAlt className="opacity-80 fill-vermilion-400"/> Latest recipes</h1>
+            <p className="text-2xl font-thin text-white/60 flex gap-2" > Our latest recipes, we try to add new ones daily!</p>
+          </div>
+          <div className="w-full h-fit p-5 bg-slate-800/20 flex flex-col gap-4">
             <RecipeListing title="Homemade Vanilla Ice Cream" 
               desc="This recipe from Taste of Home is considered one of the best vanilla ice cream recipes available." 
               image={vanillaIceCream}

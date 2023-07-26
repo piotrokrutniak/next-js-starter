@@ -8,8 +8,7 @@ import { useState } from "react"
 export function RecipeListing({rating = 0, title, desc, tags, image, saved,}: 
     {rating: number | undefined, title: string | undefined, desc: string | undefined, tags: string[], image: StaticImageData | string, saved: boolean }){
       const [isSaved, setSaved] = useState(saved)
-      
-  
+
       return(
         <div className="w-full p-4 md:h-48 bg-black hover:bg-slate-500/5 rounded-lg shadow-md shadow-black/40 flex flex-col md:flex-row md:justify-between gap-8 items-center text-white group">
           <div className='h-64 w-full md:w-40 md:h-40 shrink-0 rounded-lg overflow-hidden relative cursor-pointer'>

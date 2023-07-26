@@ -23,7 +23,7 @@ export default function Home() {
         <div className="sm:p-8 pb-14 flex justify-between">
           <h1 className="text-5xl text-white"> Browse <span className="text-vermilion-400">tastiest</span> recipes. </h1>
         </div>
-        <div className='w-full overflow-x-auto scroll'>
+        <div className='w-full overflow-x-auto'>
 
         <div className="relative w-fit left-0 flex gap-10 pt-3 overflow-x-auto m-auto justify-around select-none pb-10">
           <div className="w-80 h-80 shrink-0 bg-slate-700/30 rounded-lg flex cursor-pointer text-white/70 hover:bg-slate-700/50 hover:-translate-y-1 transition-all relative overflow-hidden group" >
@@ -42,7 +42,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="searchbar-section" className='max-w-7xl bg-black/90  m-auto w-full sm:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
+      <section id="searchbar-section" className='max-w-7xl bg-black/90  m-auto w-full p-8 sm:px-16 rounded-xl shadow-md shadow-black/40 flex-col'>
         <SearchBar/>
       </section>
 

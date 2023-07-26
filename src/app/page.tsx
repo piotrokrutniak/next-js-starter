@@ -42,7 +42,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="searchbar-section" className='max-w-7xl bg-black/90  m-auto w-full p-8 sm:px-16 rounded-xl shadow-md shadow-black/40 flex-col'>
+      <section id="searchbar-section" className='max-w-7xl bg-black/90 px-7 m-auto w-full p-8 sm:px-16 rounded-xl shadow-md shadow-black/40 flex-col'>
         <SearchBar/>
       </section>
 

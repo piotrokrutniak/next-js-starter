@@ -16,7 +16,7 @@ export default function Rating({rating = 0,}: {rating: number | undefined | void
 
 
     return(
-        <div className="flex gap-1 items-center text-white/60">
+        <div className="flex gap-1 items-center shrink-0 text-white/60">
             {ratings} - {initRating}
         </div>
     )

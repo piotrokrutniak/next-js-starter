@@ -46,13 +46,13 @@ export default function Home() {
         <SearchBar/>
       </section>
 
-      <section id="top-picks-section" className='max-w-7xl bg-black/90  m-auto w-full sm:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
+      <section id="top-picks-section" className='max-w-7xl bg-black/90 m-auto w-full sm:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
         <div className="lg:p-8 pb-14 flex flex-col gap-5">
           <div className="p-8">
             <h1 className="text-3xl text-white flex gap-2 pb-2" > <FaFireAlt className="opacity-80 fill-vermilion-400"/> Latest recipes</h1>
             <p className="text-2xl font-thin text-white/60 flex gap-2" > Our latest recipes, we try to add new ones daily!</p>
           </div>
-          <div className="w-full h-fit p-5 bg-slate-800/20 flex flex-col gap-4">
+          <div className="w-full h-fit p-5 bg-slate-800/25 flex flex-col gap-4">
             <RecipeListing title="Homemade Vanilla Ice Cream" 
               desc="This recipe from Taste of Home is considered one of the best vanilla ice cream recipes available." 
               image={vanillaIceCream}

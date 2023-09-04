@@ -119,51 +119,6 @@ export default function RecipePage(){
     )
 }
 
-function RecipeHeader({rating = 0, title, desc, tags = [], saved,}: 
-    {rating: number | undefined, title: string | undefined, desc: string | undefined, tags: string[], image: StaticImageData | string, saved: boolean }){
-    const [isSaved, setSaved] = useState(saved)
-
-    const [discardStarted, setDiscardStarted] = useState(false)
-
-    function Discard(){
-        if(discardStarted){
-            //method to discard the whole draft
-            return setDiscardStarted(false)
-        }    
-        return setDiscardStarted(true)
-    }
-    return(
-        <>
-        <div className="flex justify-between items-center">
-                <h1 className="text-2xl cursor-pointer bg-clip-text hover:text-transparent bg-gradient-to-r from-vermilion-500 to-vermilion-400">{title ?? "Recipe Name"}</h1>
-                <Rating rating={rating}/>
-                </div>
-                <div className="flex justify-between items-center pt-5">
-                <p className="text-white/60">{desc ?? "Description"}</p>
-                </div>
-                <div className="flex justify-between items-center pt-5">
-                {tags.map(x => <Button className="bg-slate-500/20 hover:bg-slate-500/40 text-sm font-thin py-1" onClick={undefined}>{x}</Button>)} 
-                <Button className="bg-slate-700/40 hover:bg-vermilion-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                    onClick={() => setSaved(x => !x)}> 
-                    {isSaved ? <>Saved <FaBookmark/></> : <>Save <FaRegBookmark/></>}
-                </Button>
-                <div className="flex flex-row-reverse gap-2">
-                    <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                        onClick={() => setSaved(x => !x)}> 
-                          {isSaved ? <>Saving <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Save <FaSave/></>}
-                    </Button>
-                    <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
-                        active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
-                        onClick={() => Discard()}> 
-                        {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
-                    </Button>
-                </div>
-
-
-        </div>
-        </>
-    )
-}
 
 function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popupOpen: boolean}){
     const [isSaved, setSaved] = useState(false)

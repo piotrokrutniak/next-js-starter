@@ -3,26 +3,47 @@ import Image, { StaticImageData } from 'next/image'
 import Rating from '@/app/components/generic/rating'
 import Button from '@/app/components/generic/button'
 import { FaBookmark, FaRegBookmark, FaClock, FaSave, FaTrashAlt } from 'react-icons/fa'
-import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill } from 'react-icons/bs'
-import { useState } from 'react'
+import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill, BsFolder, BsFolderFill, BsImageFill, BsX } from 'react-icons/bs'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import FormInput from '@/app/components/generic/formInput';
 import TextArea from '@/app/components/generic/textArea';
 import IngredientList from '@/app/components/recipeForm/ingredientFormList';
 import { Checkbox } from '@mui/material';
 import FormCheckbox from '@/app/components/generic/formCheckbox';
 import { start } from 'repl';
+import FormPopup from '@/app/components/generic/formPopup';
+import Router from 'next/router';
+import Link from 'next/link';
 
 export default function RecipePage(){
     const [isSaved, setSaved] = useState(false)
     const [discardStarted, setDiscardStarted] = useState(false)
     const [popupOpen, setPopupOpen] = useState(false)
+    const [uploadOpen, setUploadOpen] = useState(false)
+    const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
+
+    type FileOrUndefined = File | undefined;
+
+    const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
+
+    const fileInput = useRef<HTMLInputElement | null>(null)
 
     function Discard(){
         if(discardStarted){
             //method to discard the whole draft
+            Router.push('/');
             return setDiscardStarted(false)
         }    
         return setDiscardStarted(true)
+    }
+
+    function SaveThumbnail(){
+        setThumbnail(fileToUpload)
+        console.log(thumbnail)
+    }
+
+    function ImageUploadDiscard(){
+        setFileToUpload(undefined)
     }
 
     const [ingredients, setIngredients] = useState(
@@ -34,6 +55,15 @@ export default function RecipePage(){
         ]
     )
 
+    function TriggerFileInput(){
+        fileInput.current?.click();
+    }
+
+    function HandleFileChange(event: any){
+        setFileToUpload(event.target.files[0])
+        setThumbnail(event.target.files[0])
+    }
+    
     function AddRecipeIngredient(){
         let updatedIngredients = ingredients
         updatedIngredients.push({name: "", desc: "", key: 4})
@@ -43,14 +73,35 @@ export default function RecipePage(){
 
     return(
         <main className="flex flex-col m-auto max-xl:mx-3 gap-4">
+            {uploadOpen && 
+            <div className="w-full h-full fixed top-0 left-0 bg-black/50 backdrop-blur-md z-50 text-white">
+                    <FormPopup className="w-112" headerText="Upload Image" uploadFunction={() => console.log("click")} setPopUpOpen={setUploadOpen} popupOpen={uploadOpen} 
+                        triggerDiscard={ImageUploadDiscard} triggerSave={SaveThumbnail}>
+                            <h2>Choose a file to upload:</h2>
+                            <input ref={fileInput} type="file" accept=".jpg,.jpeg,.png,.pneg" className="hidden" onChange={(e) => HandleFileChange(e)} />
+                            <Button onClick={(e) => TriggerFileInput()} className="w-fit mt-2 mb-6">
+                                Browse <BsFolderFill className="mt-1"/>
+                            </Button>
+
+                            <div className="flex aspect-square w-full bg-slate-400/30 relative rounded-lg overflow-hidden place-items-center justify-center">
+                                
+                                {fileToUpload ? <Image layout="fill" objectFit="cover" className="w-full h-full" src={URL.createObjectURL(fileToUpload)} alt="Image to be uploaded"/> : <BsImageFill className="w-24 h-24 opacity-50"/>}
+                                {fileToUpload ? 
+                                <BsX className="absolute top-0 right-0 w-10 h-10 cursor-pointer opacity-60 hover:opacity-100 transition-all active:opacity-30 duration-100"
+                                    onClick={() => setFileToUpload(undefined)}/> : 
+                                <></>}
+                            </div>
+                            {fileToUpload && <h3 className="text-sm w-full break-words">{fileToUpload?.name}</h3>}
+                    </FormPopup>
+            </div>
+            }
             <section id="header-section" className='max-w-7xl h-112 min-h-fit bg-black/90 flex m-auto w-full rounded-xl mt-4 shadow-md shadow-black/40 overflow-clip'>
-                <div id="image-section" className="w-112 shrink-0 h-full relative group cursor-pointer">
-                    {
-                        <div className="bg-slate-400/50 w-full h-full flex group-hover:bg-slate-400/40 group-active:bg-slate-400/30 transition-all">
-                            <BsUpload className="h-16 w-16 place-self-center m-auto fill-white/80 group-hover:scale-110 group-active:scale-100 transition-all"/> 
+                <div id="image-section" className="w-112 shrink-0 h-full relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
+                        <div className={`${thumbnail ? "bg-black/90" : "bg-slate-400/50 group-hover:bg-slate-400/40 group-active:bg-slate-400/30"} w-full h-full flex   transition-all`}>
+                            <BsUpload className="h-16 w-16 place-self-center m-auto fill-white/80 group-hover:scale-110 group-active:scale-100 transition-all z-10"/> 
+                            {thumbnail === undefined ? "" : <Image layout="fill" objectFit="cover" className="w-full h-full group-active:opacity-70 group-hover:opacity-80" 
+                                src={thumbnail === undefined ? "" : URL.createObjectURL(thumbnail)} alt=""/>}
                         </div>
-                        //<Image src={breakfast} layout="fill" objectFit="cover" alt="Breakfast Photo"/>
-                    }
                 </div>
                 <div id="title-section" className="p-8 flex text-white w-full">
                     <div className="flex flex-col self-center w-full">
@@ -73,11 +124,22 @@ export default function RecipePage(){
                                     onClick={() => setSaved(x => !x)}> 
                                     {isSaved ? <>Uploading <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Create <BsCloudUploadFill/></>}
                                 </Button>
-                                <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
-                                    active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
+
+                                {discardStarted ? 
+                                <Link className='' href={"/"}>
+                                    <Button className="hover:bg-vermilion-500/90 bg-vermilion-500/80
+                                    active:opacity-80 text-sm font-normal py-4 transition-all flex items-center gap-2"
                                     onClick={() => Discard()}> 
-                                    {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
+                                    <> Are you sure? <BsTrash/></>
                                 </Button>
+                                </Link>:
+                                <Button className="bg-slate-700/40 hover:bg-vermilion-500/90
+                                active:opacity-80 text-sm font-normal py-3 transition-all flex items-center gap-2"
+                                onClick={() => Discard()}> 
+                                <>Discard <BsTrash/></>
+                                </Button>
+                                }
+
                             </div>
                         </div>
                     </div>
@@ -119,51 +181,6 @@ export default function RecipePage(){
     )
 }
 
-function RecipeHeader({rating = 0, title, desc, tags = [], saved,}: 
-    {rating: number | undefined, title: string | undefined, desc: string | undefined, tags: string[], image: StaticImageData | string, saved: boolean }){
-    const [isSaved, setSaved] = useState(saved)
-
-    const [discardStarted, setDiscardStarted] = useState(false)
-
-    function Discard(){
-        if(discardStarted){
-            //method to discard the whole draft
-            return setDiscardStarted(false)
-        }    
-        return setDiscardStarted(true)
-    }
-    return(
-        <>
-        <div className="flex justify-between items-center">
-                <h1 className="text-2xl cursor-pointer bg-clip-text hover:text-transparent bg-gradient-to-r from-vermilion-500 to-vermilion-400">{title ?? "Recipe Name"}</h1>
-                <Rating rating={rating}/>
-                </div>
-                <div className="flex justify-between items-center pt-5">
-                <p className="text-white/60">{desc ?? "Description"}</p>
-                </div>
-                <div className="flex justify-between items-center pt-5">
-                {tags.map(x => <Button className="bg-slate-500/20 hover:bg-slate-500/40 text-sm font-thin py-1" onClick={undefined}>{x}</Button>)} 
-                <Button className="bg-slate-700/40 hover:bg-vermilion-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                    onClick={() => setSaved(x => !x)}> 
-                    {isSaved ? <>Saved <FaBookmark/></> : <>Save <FaRegBookmark/></>}
-                </Button>
-                <div className="flex flex-row-reverse gap-2">
-                    <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                        onClick={() => setSaved(x => !x)}> 
-                          {isSaved ? <>Saving <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Save <FaSave/></>}
-                    </Button>
-                    <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
-                        active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
-                        onClick={() => Discard()}> 
-                        {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
-                    </Button>
-                </div>
-
-
-        </div>
-        </>
-    )
-}
 
 function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popupOpen: boolean}){
     const [isSaved, setSaved] = useState(false)
@@ -179,27 +196,26 @@ function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popu
 
     return(
         <div className="w-full text-base h-full bg-black/60 backdrop-blur-sm flex absolute top-0 left-0 justify-center">
-                    <div className="w-96 h-fit mt-32 rounded-lg shadow-md shadow-black/40 overflow-hidden bg-black">
-                        <div className="w-full flex gap-2 flex-col p-10 h-full bg-slate-700/20">
-                            <h2 className="font-semibold text-2xl mb-5">Add New Ingredient</h2>
-                            <FormInput label="Name" inputClassName="w-fit p-3 mb-6" placeholder="Enter ingredient name"/>
-                            <FormCheckbox className="w-44" label="Vegan?"/>
-                            <FormCheckbox className="w-44 mb-6" label="Vegetarian?"/>
-                            <FormCheckbox className="w-44 mb-6" label="Vegatbular?"/>
-
-                            <div className="flex flex-row-reverse gap-2">
-                                <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                                    onClick={() => setSaved(x => !x)}> 
-                                    {isSaved ? <>Saving <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Save <FaSave/></>}
-                                </Button>
-                                <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
-                                    active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
-                                    onClick={() => Discard()}> 
-                                    {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
-                                </Button>
-                            </div>
-                        </div>
+            <div className="w-96 h-fit mt-32 rounded-lg shadow-md shadow-black/40 overflow-hidden bg-black">
+                <div className="w-full flex gap-2 flex-col p-10 h-full bg-slate-700/20">
+                    <h2 className="font-semibold text-2xl mb-5">Add New Ingredient</h2>
+                    <FormInput label="Name" inputClassName="w-fit p-3 mb-6" placeholder="Enter ingredient name"/>
+                    <FormCheckbox className="w-44" label="Vegan?"/>
+                    <FormCheckbox className="w-44 mb-6" label="Vegetarian?"/>
+                    <FormCheckbox className="w-44 mb-6" label="Vegatbular?"/>
+                    <div className="flex flex-row-reverse gap-2">
+                        <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
+                            onClick={() => setSaved(x => !x)}> 
+                            {isSaved ? <>Saving <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Save <FaSave/></>}
+                        </Button>
+                        <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
+                            active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
+                            onClick={() => Discard()}> 
+                            {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
+                        </Button>
                     </div>
                 </div>
+            </div>
+        </div>
     )
 }

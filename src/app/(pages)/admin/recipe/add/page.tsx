@@ -33,7 +33,7 @@ export default function RecipePage(){
         return value ? true : false
     }
 
-    const [recipeData, setRecipeData] = useState<{ _id: string; title: string; preparationTime: number | string; rating: number; coverImage: string; }>({
+    const [recipeData, setRecipeData] = useState<{ _id: string; title: string; preparationTime: any; rating: number; coverImage: string; }>({
         _id: "",
         title: "",
         preparationTime: 0,
@@ -45,7 +45,7 @@ export default function RecipePage(){
         setRecipeData({...recipeData, title: value})
     }
 
-    function UpdatePreparationTime(value: number | string){
+    function UpdatePreparationTime(value: any){
         setRecipeData({...recipeData, preparationTime: value})
     }
 
@@ -85,7 +85,7 @@ export default function RecipePage(){
         setFileToUpload(undefined)
     }
 
-    const [ingredients, setIngredients] = useState([])
+    const [ingredients, setIngredients] = useState<{name: string; desc: string; key: number;}[]>([])
 
     function TriggerFileInput(){
         fileInput.current?.click();

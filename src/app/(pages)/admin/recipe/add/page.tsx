@@ -21,12 +21,50 @@ export default function RecipePage(){
     const [popupOpen, setPopupOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
     const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
+    const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
 
     type FileOrUndefined = File | undefined;
 
-    const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
-
     const fileInput = useRef<HTMLInputElement | null>(null)
+
+    // Data for API request
+
+    function CheckFalsy(value: any){
+        return value ? true : false
+    }
+
+    const [recipeData, setRecipeData] = useState<{ _id: string; title: string; preparationTime: number | string; rating: number; coverImage: string; }>({
+        _id: "",
+        title: "",
+        preparationTime: 0,
+        rating: 0,
+        coverImage: ""
+    })
+
+    function UpdateTitle(value: string){
+        setRecipeData({...recipeData, title: value})
+    }
+
+    function UpdatePreparationTime(value: number | string){
+        setRecipeData({...recipeData, preparationTime: value})
+    }
+
+    function ValidateTitle(){
+        setFormValidation({...formValidation, recipeName: CheckFalsy(recipeData.title)})
+        console.log(formValidation.recipeName)
+        console.log(recipeData.title)
+    }
+
+    function ValidatePreparationTime(){
+        console.log(recipeData.preparationTime)
+        console.log(isNaN(recipeData.preparationTime))
+        setFormValidation({...formValidation, preparationTime: recipeData.preparationTime >= 0 && !isNaN(recipeData.preparationTime)})
+    }
+
+    const [formValidation, setFormValidation] = useState({
+        recipeName: CheckFalsy(recipeData.title),
+        preparationTime: recipeData.preparationTime >= 0,
+    })
 
     function Discard(){
         if(discardStarted){
@@ -39,21 +77,15 @@ export default function RecipePage(){
 
     function SaveThumbnail(){
         setThumbnail(fileToUpload)
-        console.log(thumbnail)
+        // Update after integrating CDN
+        setRecipeData({...recipeData, coverImage: ""})
     }
 
     function ImageUploadDiscard(){
         setFileToUpload(undefined)
     }
 
-    const [ingredients, setIngredients] = useState(
-        [
-            {name: "strawberries", desc: "4 cups fresh strawberries, hulled and sliced", key: 0},
-            {name: "sugar", desc: "1 cup sugar", key: 1},
-            {name: "lemon juice", desc: "1 tablespoon lemon juice", key: 2},
-            {name: "flour", desc: "2 cups flour", key: 3}
-        ]
-    )
+    const [ingredients, setIngredients] = useState([])
 
     function TriggerFileInput(){
         fileInput.current?.click();
@@ -68,7 +100,6 @@ export default function RecipePage(){
         let updatedIngredients = ingredients
         updatedIngredients.push({name: "", desc: "", key: 4})
         setIngredients([...updatedIngredients])
-        console.log(ingredients)
     }
 
     return(
@@ -99,14 +130,15 @@ export default function RecipePage(){
                 <div id="image-section" className="w-112 shrink-0 h-full relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
                         <div className={`${thumbnail ? "bg-black/90" : "bg-slate-400/50 group-hover:bg-slate-400/40 group-active:bg-slate-400/30"} w-full h-full flex   transition-all`}>
                             <BsUpload className="h-16 w-16 place-self-center m-auto fill-white/80 group-hover:scale-110 group-active:scale-100 transition-all z-10"/> 
-                            {thumbnail === undefined ? "" : <Image layout="fill" objectFit="cover" className="w-full h-full group-active:opacity-70 group-hover:opacity-80" 
+                            {thumbnail === undefined ? "" : <Image layout="fill" objectFit="cover" className="w-full h-full group-active:opacity-40 group-hover:opacity-60" 
                                 src={thumbnail === undefined ? "" : URL.createObjectURL(thumbnail)} alt=""/>}
                         </div>
                 </div>
                 <div id="title-section" className="p-8 flex text-white w-full">
                     <div className="flex flex-col self-center w-full">
                         <div className='flex gap-5 place-content-between content-center mb-6'>
-                            <FormInput className="w-full" label="Recipe Name" placeholder="Enter recipe name"/>
+                            <FormInput className="w-full" label="Recipe Name" placeholder="Enter recipe name" validationMessage="The recipe name is required." 
+                                validationResult={formValidation.recipeName} onBlur={ValidateTitle} onChange={UpdateTitle}/>
                             <Rating  rating={4.2}/>
                         </div>
                         <TextArea label="Recipe Summary" placeholder="Enter short recipe description"/>
@@ -115,7 +147,9 @@ export default function RecipePage(){
                                 <BsClock className="h-4 w-4 place-self-center"/> 
                                 <p className="place-self-center place-items-center text-white/80 flex gap-2">
                                     Preparation time:
-                                    <FormInput className="w-16" inputClassName="w-fit text-center" placeholder="0"/> 
+                                    <FormInput className="w-16" inputClassName="w-fit text-center" placeholder="0" validationMessage="Must be a number greater than 0." 
+                                        messageClassName="absolute -bottom-6 -right-17 w-fit whitespace-nowrap"
+                                        validationResult={formValidation.preparationTime} onBlur={ValidatePreparationTime} onChange={UpdatePreparationTime}/> 
                                     minutes
                                 </p>
                             </div>
@@ -146,7 +180,7 @@ export default function RecipePage(){
                 </div>
             </section>
             
-            <section id="ingredients-section" className='max-w-7xl overflow-hidden bg-black flex flex-col m-auto w-full relative text-lg p-8 rounded-xl mt-4 shadow-md shadow-black/40 text-white'>
+            <section id="ingredients-section" className='max-w-7xl overflow-hidden h-fit bg-black flex flex-col m-auto w-full relative text-lg p-8 rounded-xl mt-4 shadow-md shadow-black/40 text-white'>
                 <h2 className="text-4xl font-semibold flex gap-2 mb-6">
                     <BsShopWindow className="h-7 w-7 place-self-center fill-vermilion-400"/> 
                     Igredients
@@ -164,7 +198,7 @@ export default function RecipePage(){
                         </li>
                     </ul>
                     <br/>
-                    <TextArea inputClassName="mt-5"  label="Ingredients Notes" placeholder="Enter short recipe description"/>
+                    <TextArea inputClassName="mt-5 h-64"  label="Ingredients Notes" placeholder="Enter short recipe description"/>
                 </p>
 
                 {popupOpen && <AddIngredientPopup setPopUpOpen={setPopupOpen} popupOpen={popupOpen}/>}

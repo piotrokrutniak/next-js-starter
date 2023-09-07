@@ -28,7 +28,7 @@ export default function FormPopup({children, headerText, setPopUpOpen, popupOpen
 
     return(
         <div className={`w-full text-base h-full bg-black/60 backdrop-blur-sm flex absolute top-0 left-0 justify-center`}>
-            <div className={`${className ?? ""} w-fit h-fit mt-32 rounded-lg shadow-md shadow-black/40 overflow-hidden bg-black`}>
+            <div className={`${className ?? ""} h-fit mt-32 rounded-lg shadow-md shadow-black/40 overflow-hidden bg-black`}>
                 <div className="w-full flex gap-2 flex-col p-10 h-full bg-slate-700/20">
                     <h2 className="font-semibold text-2xl mb-5">{headerText}</h2>
                     {children}

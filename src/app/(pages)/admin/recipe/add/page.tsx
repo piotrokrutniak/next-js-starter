@@ -4,7 +4,7 @@ import Rating from '@/app/components/generic/rating'
 import Button from '@/app/components/generic/button'
 import { FaBookmark, FaRegBookmark, FaClock, FaSave, FaTrashAlt } from 'react-icons/fa'
 import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill, BsFolder, BsFolderFill, BsImageFill, BsX } from 'react-icons/bs'
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
+import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react'
 import FormInput from '@/app/components/generic/formInput';
 import TextArea from '@/app/components/generic/textArea';
 import IngredientList from '@/app/components/recipeForm/ingredientFormList';
@@ -14,6 +14,8 @@ import { start } from 'repl';
 import FormPopup from '@/app/components/generic/formPopup';
 import Router from 'next/router';
 import Link from 'next/link';
+import { FileOrUndefined } from '@/app/types';
+import ImageUploadPopUp from '@/app/components/popUps/ImageUploadPopUp/imageUploadPopUp';
 
 export default function RecipePage(){
     const [isSaved, setSaved] = useState(false)
@@ -22,8 +24,6 @@ export default function RecipePage(){
     const [uploadOpen, setUploadOpen] = useState(false)
     const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
     const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
-
-    type FileOrUndefined = File | undefined;
 
     const fileInput = useRef<HTMLInputElement | null>(null)
 
@@ -106,24 +106,8 @@ export default function RecipePage(){
         <main className="flex flex-col m-auto max-xl:mx-3 gap-4">
             {uploadOpen && 
             <div className="w-full h-full fixed top-0 left-0 bg-black/50 backdrop-blur-md z-50 text-white">
-                    <FormPopup className="w-112" headerText="Upload Image" uploadFunction={() => console.log("click")} setPopUpOpen={setUploadOpen} popupOpen={uploadOpen} 
-                        triggerDiscard={ImageUploadDiscard} triggerSave={SaveThumbnail}>
-                            <h2>Choose a file to upload:</h2>
-                            <input ref={fileInput} type="file" accept=".jpg,.jpeg,.png,.pneg" className="hidden" onChange={(e) => HandleFileChange(e)} />
-                            <Button onClick={(e) => TriggerFileInput()} className="w-fit mt-2 mb-6">
-                                Browse <BsFolderFill className="mt-1"/>
-                            </Button>
-
-                            <div className="flex aspect-square w-full bg-slate-400/30 relative rounded-lg overflow-hidden place-items-center justify-center">
-                                
-                                {fileToUpload ? <Image layout="fill" objectFit="cover" className="w-full h-full" src={URL.createObjectURL(fileToUpload)} alt="Image to be uploaded"/> : <BsImageFill className="w-24 h-24 opacity-50"/>}
-                                {fileToUpload ? 
-                                <BsX className="absolute top-0 right-0 w-10 h-10 cursor-pointer opacity-60 hover:opacity-100 transition-all active:opacity-30 duration-100"
-                                    onClick={() => setFileToUpload(undefined)}/> : 
-                                <></>}
-                            </div>
-                            {fileToUpload && <h3 className="text-sm w-full break-words">{fileToUpload?.name}</h3>}
-                    </FormPopup>
+                    <ImageUploadPopUp HandleFileChange={HandleFileChange} ImageUploadDiscard={ImageUploadDiscard} SaveThumbnail={SaveThumbnail} TriggerFileInput={TriggerFileInput}
+                        fileInput={fileInput} fileToUpload={fileToUpload} setFileToUpload={setFileToUpload} setUploadOpen={setUploadOpen} uploadOpen={uploadOpen}/>
             </div>
             }
             <section id="header-section" className='max-w-7xl h-112 min-h-fit bg-black/90 flex m-auto w-full rounded-xl mt-4 shadow-md shadow-black/40 overflow-clip'>
@@ -234,9 +218,8 @@ function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popu
                 <div className="w-full flex gap-2 flex-col p-10 h-full bg-slate-700/20">
                     <h2 className="font-semibold text-2xl mb-5">Add New Ingredient</h2>
                     <FormInput label="Name" inputClassName="w-fit p-3 mb-6" placeholder="Enter ingredient name"/>
-                    <FormCheckbox className="w-44" label="Vegan?"/>
-                    <FormCheckbox className="w-44 mb-6" label="Vegetarian?"/>
-                    <FormCheckbox className="w-44 mb-6" label="Vegatbular?"/>
+                    <FormCheckbox className="w-44" label="Vegan"/>
+                    <FormCheckbox className="w-44 mb-6" label="Vegetarian"/>
                     <div className="flex flex-row-reverse gap-2">
                         <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
                             onClick={() => setSaved(x => !x)}> 
@@ -253,3 +236,4 @@ function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popu
         </div>
     )
 }
+

@@ -16,12 +16,15 @@ import Router from 'next/router';
 import Link from 'next/link';
 import { FileOrUndefined } from '@/app/types';
 import ImageUploadPopUp from '@/app/components/popUps/ImageUploadPopUp/imageUploadPopUp';
+import { GetRecipe, PostRecipe, UploadImage } from '@/app/integration/cloudinary/recipeMethods';
+import { Url } from 'url';
 
 export default function RecipePage(){
     const [isSaved, setSaved] = useState(false)
     const [discardStarted, setDiscardStarted] = useState(false)
     const [popupOpen, setPopupOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
+    const [formValidated, setFormValidated] = useState(false)
     const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
     const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
 
@@ -33,6 +36,8 @@ export default function RecipePage(){
         return value ? true : false
     }
 
+
+
     const [recipeData, setRecipeData] = useState<{ _id: string; title: string; preparationTime: any; rating: number; coverImage: string; }>({
         _id: "",
         title: "",
@@ -40,6 +45,7 @@ export default function RecipePage(){
         rating: 0,
         coverImage: ""
     })
+
 
     function UpdateTitle(value: string){
         setRecipeData({...recipeData, title: value})
@@ -49,16 +55,16 @@ export default function RecipePage(){
         setRecipeData({...recipeData, preparationTime: value})
     }
 
-    function ValidateTitle(){
+    async function ValidateTitle(){
         setFormValidation({...formValidation, recipeName: CheckFalsy(recipeData.title)})
-        console.log(formValidation.recipeName)
-        console.log(recipeData.title)
     }
 
-    function ValidatePreparationTime(){
-        console.log(recipeData.preparationTime)
-        console.log(isNaN(recipeData.preparationTime))
+    async function ValidatePreparationTime(){
         setFormValidation({...formValidation, preparationTime: recipeData.preparationTime >= 0 && !isNaN(recipeData.preparationTime)})
+    }
+
+    function ValidateForm(){
+        setFormValidated(formValidation.preparationTime && formValidation.recipeName)
     }
 
     const [formValidation, setFormValidation] = useState({
@@ -66,9 +72,12 @@ export default function RecipePage(){
         preparationTime: recipeData.preparationTime >= 0,
     })
 
+    useEffect(() => {
+        ValidateForm()
+    }, [formValidation])
+
     function Discard(){
         if(discardStarted){
-            //method to discard the whole draft
             Router.push('/');
             return setDiscardStarted(false)
         }    
@@ -77,8 +86,9 @@ export default function RecipePage(){
 
     function SaveThumbnail(){
         setThumbnail(fileToUpload)
-        // Update after integrating CDN
-        setRecipeData({...recipeData, coverImage: ""})
+        if(fileToUpload){
+            setRecipeData({...recipeData, coverImage: URL.createObjectURL(fileToUpload)})
+        }
     }
 
     function ImageUploadDiscard(){
@@ -102,9 +112,28 @@ export default function RecipePage(){
         setIngredients([...updatedIngredients])
     }
 
+    async function SaveRecipe(){
+        const validated = formValidation.preparationTime && formValidation.recipeName
+
+        if(!validated){
+            return
+        }
+
+        setSaved(true)
+
+        if(thumbnail){
+            recipeData.coverImage = await UploadImage(thumbnail)
+        }
+
+        PostRecipe(recipeData)
+
+        console.log(recipeData)
+        setTimeout(() => setSaved(false), 2000)
+    }
+
     return(
         <main className="flex flex-col m-auto max-xl:mx-3 gap-4">
-            {uploadOpen && 
+            {uploadOpen &&
             <div className="w-full h-full fixed top-0 left-0 bg-black/50 backdrop-blur-md z-50 text-white">
                     <ImageUploadPopUp HandleFileChange={HandleFileChange} ImageUploadDiscard={ImageUploadDiscard} SaveThumbnail={SaveThumbnail} TriggerFileInput={TriggerFileInput}
                         fileInput={fileInput} fileToUpload={fileToUpload} setFileToUpload={setFileToUpload} setUploadOpen={setUploadOpen} uploadOpen={uploadOpen}/>
@@ -138,8 +167,9 @@ export default function RecipePage(){
                                 </p>
                             </div>
                             <div className="flex flex-row-reverse gap-2">
-                                <Button className="bg-green-500/70 hover:bg-green-500/90 active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2"
-                                    onClick={() => setSaved(x => !x)}> 
+                                <Button className={`${formValidated ? "bg-green-500/70 hover:bg-green-500/90 active:opacity-80" : "bg-slate-500/70 cursor-not-allowed hover:opacity-80"} text-sm font-normal py-1 transition-all flex items-center gap-2`}
+                                    onClick={() => SaveRecipe()}
+                                    disabled={!formValidated}> 
                                     {isSaved ? <>Uploading <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Create <BsCloudUploadFill/></>}
                                 </Button>
 

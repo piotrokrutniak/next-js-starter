@@ -2,7 +2,7 @@
 import Image, { StaticImageData } from 'next/image'
 import Rating from '@/app/components/generic/rating'
 import Button from '@/app/components/generic/button'
-import { FaBookmark, FaRegBookmark, FaClock, FaSave, FaTrashAlt } from 'react-icons/fa'
+import { FaBookmark, FaSeedling, FaSave } from 'react-icons/fa'
 import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill, BsFolder, BsFolderFill, BsImageFill, BsX } from 'react-icons/bs'
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react'
 import FormInput from '@/app/components/generic/formInput';
@@ -14,11 +14,14 @@ import { start } from 'repl';
 import FormPopup from '@/app/components/generic/formPopup';
 import Router from 'next/router';
 import Link from 'next/link';
-import { FileOrUndefined } from '@/app/types';
+import { FileOrUndefined, Recipe } from '@/app/types';
 import ImageUploadPopUp from '@/app/components/popUps/ImageUploadPopUp/imageUploadPopUp';
 import { GetRecipe, PostRecipe, UploadImage } from '@/app/integration/cloudinary/recipeMethods';
 import { Url } from 'url';
 import PostIngredient from '@/app/integration/cloudinary/ingredients/postIngredient';
+import PostRecipeIngredients from '@/app/integration/cloudinary/recipeIngredients/postRecipeIngredients';
+import AddIngredientPopup from './components/addIngredientPopup';
+import Switch from '@/app/components/generic/switch';
 
 export default function RecipePage(){
     const [isSaved, setSaved] = useState(false)
@@ -28,25 +31,24 @@ export default function RecipePage(){
     const [formValidated, setFormValidated] = useState(false)
     const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
     const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
+    const [published, setPublished] = useState<boolean>(false)
 
     const fileInput = useRef<HTMLInputElement | null>(null)
-
-    // Data for API request
 
     function CheckFalsy(value: any){
         return value ? true : false
     }
 
-
-
-    const [recipeData, setRecipeData] = useState<{ _id: string; title: string; preparationTime: any; rating: number; coverImage: string; }>({
+    const [recipeData, setRecipeData] = useState<Recipe>({
         _id: "",
         title: "",
+        summary: "",
         preparationTime: 0,
         rating: 0,
-        coverImage: ""
+        coverImage: "",
+        published: published,
+        publishedDate: Date.now()
     })
-
 
     function UpdateTitle(value: string){
         setRecipeData({...recipeData, title: value})
@@ -65,7 +67,11 @@ export default function RecipePage(){
     }
 
     function ValidateForm(){
-        setFormValidated(formValidation.preparationTime && formValidation.recipeName)
+        const ingredientsCheck = ingredients.find(x => x.desc == "" || x.ingredientId == "") === undefined
+        const validated = formValidation.preparationTime && formValidation.recipeName && ingredientsCheck
+        setFormValidated(validated)
+
+        return validated
     }
 
     const [formValidation, setFormValidation] = useState({
@@ -96,7 +102,7 @@ export default function RecipePage(){
         setFileToUpload(undefined)
     }
 
-    const [ingredients, setIngredients] = useState<{name: string; desc: string; key: number;}[]>([])
+    const [ingredients, setIngredients] = useState<{_id: string; name: string; desc: string; ingredientId: string; key: number;}[]>([])
 
     function TriggerFileInput(){
         fileInput.current?.click();
@@ -109,14 +115,46 @@ export default function RecipePage(){
     
     function AddRecipeIngredient(){
         let updatedIngredients = ingredients
-        updatedIngredients.push({name: "", desc: "", key: 4})
+        updatedIngredients.push({_id: "", name: "", desc: "", ingredientId: "", key: 4})
         setIngredients([...updatedIngredients])
     }
 
-    async function SaveRecipe(){
-        const validated = formValidation.preparationTime && formValidation.recipeName
+    function UpdateIngredient(name: string, ingredientId: string, id: number){
+        const tempIngredients = ingredients
+        let ingredient = ingredients[id]
 
-        if(!validated){
+        console.log("index is" + id)
+        console.log(ingredients)
+
+        ingredient.name = name
+        ingredient.ingredientId = ingredientId
+
+        tempIngredients[id] = ingredient
+
+        setIngredients([...tempIngredients])
+    }
+
+    function UpdateIngredientDesc(desc: string, id: number){
+        const tempIngredients = ingredients
+        let ingredient = ingredients[id]
+
+        console.log("index is" + id)
+        console.log(ingredients)
+
+        ingredient.desc = desc
+
+        tempIngredients[id] = ingredient
+
+        setIngredients([...tempIngredients])
+    }
+
+    async function SaveRecipe(){
+        const validated = ValidateForm()
+        console.log(validated)
+        console.log(formValidated)
+
+
+        if(!formValidated){
             return
         }
 
@@ -127,8 +165,8 @@ export default function RecipePage(){
         }
 
         PostRecipe(recipeData)
+            .then(res => PostRecipeIngredients(ingredients, res.recipeCreated._id))
 
-        console.log(recipeData)
         setTimeout(() => setSaved(false), 2000)
     }
 
@@ -150,10 +188,11 @@ export default function RecipePage(){
                 </div>
                 <div id="title-section" className="p-8 flex text-white w-full">
                     <div className="flex flex-col self-center w-full">
-                        <div className='flex gap-5 place-content-between content-center mb-6'>
+                        <div className='flex gap-10 place-content-between content-center mb-6'>
                             <FormInput className="w-full" label="Recipe Name" placeholder="Enter recipe name" validationMessage="The recipe name is required." 
                                 validationResult={formValidation.recipeName} onBlur={ValidateTitle} onChange={UpdateTitle}/>
-                            <Rating  rating={4.2}/>
+                            
+                            <Switch className="gap-4 mb-6" setValue={setPublished} value={published} label="Published" switchColor="bg-sky-500"/>
                         </div>
                         <TextArea label="Recipe Summary" placeholder="Enter short recipe description"/>
                         <div className="flex flex-row place-content-between mt-10">
@@ -168,7 +207,7 @@ export default function RecipePage(){
                                 </p>
                             </div>
                             <div className="flex flex-row-reverse gap-2">
-                                <Button className={`${formValidated ? "bg-green-500/70 hover:bg-green-500/90 active:opacity-80" : "bg-slate-500/70 cursor-not-allowed hover:opacity-80"} text-sm font-normal py-1 transition-all flex items-center gap-2`}
+                                <Button className={`${formValidated ? "bg-green-500/70 hover:bg-green-500/90 active:opacity-80" : "bg-slate-500/70 hover:cursor-not-allowed hover:opacity-80"} text-sm font-normal py-1 transition-all flex items-center gap-2`}
                                     onClick={() => SaveRecipe()}
                                     disabled={!formValidated}> 
                                     {isSaved ? <>Uploading <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Create <BsCloudUploadFill/></>}
@@ -198,14 +237,19 @@ export default function RecipePage(){
             <section id="ingredients-section" className='max-w-7xl overflow-hidden h-fit bg-black flex flex-col m-auto w-full relative text-lg p-8 rounded-xl mt-4 shadow-md shadow-black/40 text-white'>
                 <h2 className="text-4xl font-semibold flex gap-2 mb-6">
                     <BsShopWindow className="h-7 w-7 place-self-center fill-vermilion-400"/> 
-                    Igredients
+                    Ingredients
                 </h2>
                 <h2 className="text-xl mb-5">
                     What you'll need:
                 </h2>
                 <p>
                     <ul className="list-disc flex flex-col gap-2 ml-10">
-                        <IngredientList setPopupOpen={setPopupOpen} ingredients={ingredients} setIngredients={setIngredients}/>
+                        <IngredientList setPopupOpen={setPopupOpen} 
+                            ingredients={ingredients} 
+                            setIngredients={setIngredients} 
+                            updateIngredientDesc={UpdateIngredientDesc} 
+                            updateIngredient={UpdateIngredient}
+                            validateForm={ValidateForm}/>
                         <li className="flex p-3 px-5 rounded-lg mt-2 bg-slate-700/30 w-fit place-items-center gap-2 cursor-pointer
                             hover:bg-slate-700/50 transition-all active:hover:bg-slate-700/40 select-none"
                             onClick={() => AddRecipeIngredient()}> 
@@ -231,70 +275,5 @@ export default function RecipePage(){
 }
 
 
-function AddIngredientPopup({setPopUpOpen, popupOpen} : {setPopUpOpen: any, popupOpen: boolean}){
-    const [isSaved, setSaved] = useState(false)
-    const [discardStarted, setDiscardStarted] = useState(false)
-    const [ingredientData, setIngredientData] = useState({
-        __id: "",
-        name: "",
-        vegan: false,
-        vegetarian: false,
-    })
 
-    function Save(){
-        setSaved(true)
-        if(ingredientData.name){
-            PostIngredient(ingredientData)
-        }
-
-        setTimeout(() => setSaved(false), 2000)
-    }
-
-    function Discard(){
-        if(discardStarted){
-            setPopUpOpen(false)
-            return setDiscardStarted(false)
-        }    
-        return setDiscardStarted(true)
-    }
-
-    function UpdateName(value: string){
-        setIngredientData({...ingredientData, name: value})
-    }
-
-    function UpdateVegan(value: boolean){
-        setIngredientData({...ingredientData, vegan: value})
-    }
-
-    function UpdateVegetarian(value: boolean){
-        setIngredientData({...ingredientData, vegetarian: value})
-    }
-
-    return(
-        <div className="w-full text-base h-full bg-black/60 backdrop-blur-sm flex absolute top-0 left-0 justify-center">
-            <div className="w-96 h-fit mt-32 rounded-lg shadow-md shadow-black/40 overflow-hidden bg-black">
-                <div className="w-full flex gap-2 flex-col p-10 h-full bg-slate-700/20">
-                    <h2 className="font-semibold text-2xl mb-5">Add New Ingredient</h2>
-                    <FormInput onChange={UpdateName} label="Name" inputClassName="w-fit p-3 mb-6" placeholder="Enter ingredient name"
-                        validationMessage="The ingredient name is required." 
-                        validationResult={ingredientData.name ? true : false}/>
-                    <FormCheckbox value={ingredientData.vegan} updateValue={UpdateVegan} className="w-44" label="Vegan"/>
-                    <FormCheckbox value={ingredientData.vegetarian} updateValue={UpdateVegetarian} className="w-44 mb-6" label="Vegetarian"/>
-                    <div className="flex flex-row-reverse gap-2">
-                        <Button className={`${ingredientData.name ? "bg-green-500/70 hover:bg-green-500/90 active:opacity-80" : "bg-slate-500/70 cursor-not-allowed hover:opacity-80"} text-sm font-normal py-1 transition-all flex items-center gap-2`}
-                            onClick={() => Save()}
-                            disabled={ingredientData.name ? false : true}> 
-                            {isSaved ? <>Saving <BsArrowClockwise className="animate-spin h-4 w-4"/></> : <>Save <FaSave/></>}
-                        </Button>
-                        <Button className={`${discardStarted ? "hover:bg-vermilion-500/90 bg-vermilion-500/80" : "bg-slate-700/40 hover:bg-vermilion-500/90"} 
-                            active:opacity-80 text-sm font-normal py-1 transition-all flex items-center gap-2`}
-                            onClick={() => Discard()}> 
-                            {discardStarted ? <> Are you sure? <BsTrash/></> : <>Discard <BsTrash/></>}
-                        </Button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
 

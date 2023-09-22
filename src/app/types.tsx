@@ -6,9 +6,11 @@ export type Recipe = {
     _id?: String,
     title: String,
     summary: String,
-    preparationTime: Number,
+    preparationTime: number,
     rating: Number,
-    coverImage?: String
+    coverImage?: String,
+    published: Boolean,
+    publishedDate: Date | Number
 }
 
 export type Ingredient = {
@@ -21,8 +23,8 @@ export type Ingredient = {
 export type RecipeIngredient = {
     _id?: String,
     recipeId: String,
-    quantity: Number,
-    measurementUnit: String
+    ingredientId: String,
+    desc: String
 }
 
 export type RecipeSection = {

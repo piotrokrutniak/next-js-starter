@@ -1,3 +1,4 @@
+import { Recipe } from "@/app/types";
 import {Cloudinary} from "@cloudinary/url-gen";
 import { url } from "inspector";
 import { Url } from "next/dist/shared/lib/router/router";
@@ -25,7 +26,7 @@ export async function UploadImage(file: File){
     return body.url
 }
 
-export async function PostRecipe(data: { _id: string; title: string; preparationTime: any; rating: number; coverImage: string; }){
+export async function PostRecipe(data: Recipe){
     //const apiEndpoint = GetApiEndpoint()
     console.log("inside function")
     console.log(data)
@@ -40,7 +41,7 @@ export async function PostRecipe(data: { _id: string; title: string; preparation
                         }
     )
 
-    let body = await response.json()          
+    let body = await response.json()    
     return await body
 }
 

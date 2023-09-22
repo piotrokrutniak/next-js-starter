@@ -3,7 +3,7 @@ import Image, { StaticImageData } from 'next/image'
 import Rating from '@/app/components/generic/rating'
 import Button from '@/app/components/generic/button'
 import { FaBookmark, FaSeedling, FaSave } from 'react-icons/fa'
-import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill, BsFolder, BsFolderFill, BsImageFill, BsX } from 'react-icons/bs'
+import { BsClock, BsBookFill, BsCardList, BsShopWindow, BsUpload, BsPlusCircle, BsArrowClockwise, BsTrash, BsCloudUploadFill, BsFolder, BsFolderFill, BsImageFill, BsX, BsCalendar, BsCalendar2DayFill, BsCalendar2Day, BsCalendar2Fill } from 'react-icons/bs'
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useRef, useState } from 'react'
 import FormInput from '@/app/components/generic/formInput';
 import TextArea from '@/app/components/generic/textArea';
@@ -22,16 +22,20 @@ import PostIngredient from '@/app/integration/cloudinary/ingredients/postIngredi
 import PostRecipeIngredients from '@/app/integration/cloudinary/recipeIngredients/postRecipeIngredients';
 import AddIngredientPopup from './components/addIngredientPopup';
 import Switch from '@/app/components/generic/switch';
+import SchedulePopup from '../../../../components/popUps/schedulePopUp/schedulePopup';
+import { GetDate } from '@/app/integration/globalMethods';
 
 export default function RecipePage(){
     const [isSaved, setSaved] = useState(false)
     const [discardStarted, setDiscardStarted] = useState(false)
     const [popupOpen, setPopupOpen] = useState(false)
     const [uploadOpen, setUploadOpen] = useState(false)
+    const [scheduleOpen, setScheduleOpen] = useState(false)
     const [formValidated, setFormValidated] = useState(false)
     const [thumbnail, setThumbnail] = useState<FileOrUndefined>(undefined)
     const [fileToUpload, setFileToUpload] = useState<FileOrUndefined>()
     const [published, setPublished] = useState<boolean>(false)
+    const [publishedDate, setPublishedDate] = useState<string>(GetDate())
 
     const fileInput = useRef<HTMLInputElement | null>(null)
 
@@ -46,8 +50,8 @@ export default function RecipePage(){
         preparationTime: 0,
         rating: 0,
         coverImage: "",
-        published: published,
-        publishedDate: Date.now()
+        active: false,
+        publishedDate: GetDate()
     })
 
     function UpdateTitle(value: string){
@@ -79,10 +83,6 @@ export default function RecipePage(){
         preparationTime: recipeData.preparationTime >= 0,
     })
 
-    useEffect(() => {
-        ValidateForm()
-    }, [formValidation])
-
     function Discard(){
         if(discardStarted){
             Router.push('/');
@@ -103,6 +103,10 @@ export default function RecipePage(){
     }
 
     const [ingredients, setIngredients] = useState<{_id: string; name: string; desc: string; ingredientId: string; key: number;}[]>([])
+
+    useEffect(() => {
+        ValidateForm()
+    }, [formValidation, ingredients])
 
     function TriggerFileInput(){
         fileInput.current?.click();
@@ -148,6 +152,14 @@ export default function RecipePage(){
         setIngredients([...tempIngredients])
     }
 
+    function UpdatePublishDate(value: string){
+        setRecipeData({...recipeData, publishedDate: value})
+    }
+
+    function ActiveOnSave(value: boolean){
+        setRecipeData({...recipeData, active: value})
+    }
+
     async function SaveRecipe(){
         const validated = ValidateForm()
         console.log(validated)
@@ -165,7 +177,11 @@ export default function RecipePage(){
         }
 
         PostRecipe(recipeData)
-            .then(res => PostRecipeIngredients(ingredients, res.recipeCreated._id))
+            .then(res => {
+                if(ingredients.length > 0){
+                    PostRecipeIngredients(ingredients, res.recipeCreated._id)
+                }
+            })
 
         setTimeout(() => setSaved(false), 2000)
     }
@@ -178,6 +194,13 @@ export default function RecipePage(){
                         fileInput={fileInput} fileToUpload={fileToUpload} setFileToUpload={setFileToUpload} setUploadOpen={setUploadOpen} uploadOpen={uploadOpen}/>
             </div>
             }
+
+            {scheduleOpen &&
+            <div className="w-full h-full fixed top-0 left-0 bg-black/50 backdrop-blur-md z-50 text-white">
+                <SchedulePopup setPopUpOpen={setScheduleOpen} popupOpen={scheduleOpen} date={recipeData.publishedDate} setDate={UpdatePublishDate}/>
+            </div>
+            }
+
             <section id="header-section" className='max-w-7xl h-112 min-h-fit bg-black/90 flex m-auto w-full rounded-xl mt-4 shadow-md shadow-black/40 overflow-clip'>
                 <div id="image-section" className="w-112 shrink-0 h-full relative group cursor-pointer" onClick={() => setUploadOpen(true)}>
                         <div className={`${thumbnail ? "bg-black/90" : "bg-slate-400/50 group-hover:bg-slate-400/40 group-active:bg-slate-400/30"} w-full h-full flex   transition-all`}>
@@ -188,11 +211,11 @@ export default function RecipePage(){
                 </div>
                 <div id="title-section" className="p-8 flex text-white w-full">
                     <div className="flex flex-col self-center w-full">
-                        <div className='flex gap-10 place-content-between content-center mb-6'>
+                        <div className='flex gap-5 place-content-between content-center mb-6'>
                             <FormInput className="w-full" label="Recipe Name" placeholder="Enter recipe name" validationMessage="The recipe name is required." 
                                 validationResult={formValidation.recipeName} onBlur={ValidateTitle} onChange={UpdateTitle}/>
                             
-                            <Switch className="gap-4 mb-6" setValue={setPublished} value={published} label="Published" switchColor="bg-sky-500"/>
+                            <Switch className="gap-4 mb-1" setValue={ActiveOnSave} value={recipeData.active} label="Active on save" switchColor="bg-sky-400"/>
                         </div>
                         <TextArea label="Recipe Summary" placeholder="Enter short recipe description"/>
                         <div className="flex flex-row place-content-between mt-10">
@@ -228,6 +251,12 @@ export default function RecipePage(){
                                     <>Discard <BsTrash/></>
                                 </Button>
                                 }
+
+                                <Button className="hover:bg-sky-400/80 bg-sky-500/80
+                                active:opacity-80 text-sm font-normal py-3 transition-all flex items-center gap-2"
+                                onClick={() => setScheduleOpen(true)}> 
+                                    <>Schedule <BsCalendar2Fill/></>
+                                </Button>
                             </div>
                         </div>
                     </div>

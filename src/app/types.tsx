@@ -9,8 +9,8 @@ export type Recipe = {
     preparationTime: number,
     rating: Number,
     coverImage?: String,
-    published: Boolean,
-    publishedDate: Date | Number
+    active: boolean,
+    publishedDate: string
 }
 
 export type Ingredient = {

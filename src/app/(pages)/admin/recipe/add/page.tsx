@@ -156,6 +156,10 @@ export default function RecipePage(){
         setRecipeData({...recipeData, publishedDate: value})
     }
 
+    function UpdateSummary(value: string){
+        setRecipeData({...recipeData, summary: value})
+    }
+
     function ActiveOnSave(value: boolean){
         setRecipeData({...recipeData, active: value})
     }
@@ -217,7 +221,7 @@ export default function RecipePage(){
                             
                             <Switch className="gap-4 mb-1" setValue={ActiveOnSave} value={recipeData.active} label="Active on save" switchColor="bg-sky-400"/>
                         </div>
-                        <TextArea label="Recipe Summary" placeholder="Enter short recipe description"/>
+                        <TextArea value={recipeData.summary} label="Recipe Summary" placeholder="Enter short recipe description" onChange={UpdateSummary}/>
                         <div className="flex flex-row place-content-between mt-10">
                             <div className="flex gap-2">
                                 <BsClock className="h-4 w-4 place-self-center"/> 

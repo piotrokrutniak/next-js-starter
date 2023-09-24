@@ -5,7 +5,7 @@ export type FileOrUndefined = File | undefined;
 export type Recipe = {
     _id?: String,
     title: String,
-    summary: String,
+    summary: string,
     preparationTime: number,
     rating: Number,
     coverImage?: String,

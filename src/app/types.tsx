@@ -34,3 +34,10 @@ export type RecipeSection = {
     richText: String,
     order: Number
 }
+
+export type Post = {
+    userId: number,
+    id: number,
+    title: string,
+    body: string
+}

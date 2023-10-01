@@ -1,7 +1,6 @@
 import Image, { StaticImageData } from 'next/image'
 import { FaMugHot, FaCookieBite, FaHamburger, FaFireAlt, FaBookmark, FaRegBookmark } from 'react-icons/fa'
 import CookingSvg from './components/svgComponents/CookingSvg'
-import {  } from 'flowbite'
 import Rating from './components/generic/rating'
 import Button from './components/generic/button'
 
@@ -15,6 +14,7 @@ import { useState } from 'react'
 import { RecipeListing } from './components/generic/recipeListing'
 import { Input } from 'postcss'
 import SearchBar from './components/generic/searchBar'
+import PostList from './components/generic/postList'
 
 export default function Home() {
   return (
@@ -53,24 +53,7 @@ export default function Home() {
             <p className="text-2xl font-thin text-white/60 flex gap-2" > Our latest recipes, we try to add new ones daily!</p>
           </div>
           <div className="w-full h-fit p-5 bg-slate-800/25 flex flex-col gap-4">
-            <RecipeListing title="Homemade Vanilla Ice Cream" 
-              desc="This recipe from Taste of Home is considered one of the best vanilla ice cream recipes available." 
-              image={vanillaIceCream}
-              rating={3.6} 
-              saved={true}
-              tags={["Dessert"]}/>
-            <RecipeListing title="Easy Fresh Strawberry Pie" 
-              desc="Made with fresh strawberries, this pie is a sweet and unique dessert option."
-              image={strawberryCake}
-              rating={4.2} 
-              saved={true}
-              tags={["Dessert"]}/>
-            <RecipeListing title="Greek Chicken Meat Loaf" 
-              desc="This recipe is a lighter twist on traditional meatloaf, using ground chicken instead of beef."
-              image={greekMeatLoaf}
-              rating={2.3} 
-              saved={false}
-              tags={["Lunch"]}/>
+            <PostList/>
           </div>
         </div>
       </section>

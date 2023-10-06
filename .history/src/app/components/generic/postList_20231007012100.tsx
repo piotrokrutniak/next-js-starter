@@ -74,8 +74,9 @@ function GeneratePages(page: number, count: number){
     if(page>3){
         start = page - 2
     }
-    if(maxPage - page < 3){
-        start = maxPage - 4
+
+    if(maxPage - start < 3){
+        start = maxPage - 6
     }
 
     let i = start
@@ -84,6 +85,8 @@ function GeneratePages(page: number, count: number){
         pages.push(i)
         i++
     }
+    
+    pages.sort((a, b) => a-b)
 
     return pages
 }

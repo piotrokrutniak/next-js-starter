@@ -9,28 +9,25 @@ import { count } from "console"
 
 export default function PostList(){
     const [posts, setPosts] = useState<Post[]>([])
-    const [page, setPage] = useState<number>(1)
+    const [page, setPage] = useState<number>(2)
     const [pages, setPages] = useState<number[]>([])
     const [count, setCount] = useState<number>(0)
     useEffect(() => {
         GetPosts(page)
-            .then(x => {
-                setPosts([...x.body]); 
-                setCount(Number.parseInt(x.count)); 
-                return x
-            })
-            .then((x) => setPages([...GeneratePages(page, Number.parseInt(x.count))]))
+            .then(x => {setPosts([...x.body]); setCount(Number.parseInt(x.count))})
+            .then(() => setPages([...GeneratePages(page, count)]))
+        
     }, [page])
     
     return(
         <div className="text-white flex flex-col gap-5">
-            <div className="flex justify-center w-full bg-black p-8 rounded-md gap-2">
-                <PaginationPanel page={page} setPage={setPage} pages={pages}/>
-            </div>
             {posts.map(x => 
                 <PostItem 
                     post={x}/>
             )}
+            <div className="flex justify-center w-full bg-black p-8 rounded-md gap-2">
+                <PaginationPanel page={page} setPage={setPage} pages={pages}/>
+            </div>
         </div>
     )
 }
@@ -40,8 +37,6 @@ function PaginationPanel({page, setPage, pages} : {
         setPage: Dispatch<SetStateAction<number>>;
         pages: number[]
     }){
-
-        console.log(pages)
 
     return(
         pages.map(x => 
@@ -68,21 +63,22 @@ function PageButton({index, active, setPage} : {
 
 function GeneratePages(page: number, count: number){
     let start = 1
+    let end = 6
     let pages: number[] = []
-    let maxPage = count/10
+
+
 
     if(page>3){
         start = page - 2
     }
-    if(maxPage - page < 3){
-        start = maxPage - 4
-    }
 
-    let i = start
-
-    while(i < start + 5){
-        pages.push(i)
-        i++
+    for(let i = start; i < start + 5; i++){
+        if(i > count/10){
+            pages.unshift(i - start + 2)
+        }
+        else{
+            pages.push(i)
+        }
     }
 
     return pages

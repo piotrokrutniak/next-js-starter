@@ -14,23 +14,20 @@ export default function PostList(){
     const [count, setCount] = useState<number>(0)
     useEffect(() => {
         GetPosts(page)
-            .then(x => {
-                setPosts([...x.body]); 
-                setCount(Number.parseInt(x.count)); 
-                return x
-            })
-            .then((x) => setPages([...GeneratePages(page, Number.parseInt(x.count))]))
+            .then(x => {setPosts([...x.body]); setCount(Number.parseInt(x.count))})
+            .then(() => setPages([...GeneratePages(page, count)]))
+        
     }, [page])
     
     return(
         <div className="text-white flex flex-col gap-5">
-            <div className="flex justify-center w-full bg-black p-8 rounded-md gap-2">
-                <PaginationPanel page={page} setPage={setPage} pages={pages}/>
-            </div>
             {posts.map(x => 
                 <PostItem 
                     post={x}/>
             )}
+            <div className="flex justify-center w-full bg-black p-8 rounded-md gap-2">
+                <PaginationPanel page={page} setPage={setPage} pages={pages}/>
+            </div>
         </div>
     )
 }
@@ -70,20 +67,27 @@ function GeneratePages(page: number, count: number){
     let start = 1
     let pages: number[] = []
     let maxPage = count/10
+    console.log("page: " + page)
 
     if(page>3){
         start = page - 2
-    }
-    if(maxPage - page < 3){
-        start = maxPage - 4
     }
 
     let i = start
 
     while(i < start + 5){
-        pages.push(i)
+        if(i <= maxPage){
+            pages.push(i)
+        }
+        if(i > maxPage){
+            pages.unshift(i)
+        }
+
+        console.log(i)
+        console.log(pages)
+
         i++
     }
-
+    
     return pages
 }

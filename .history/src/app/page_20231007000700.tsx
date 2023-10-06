@@ -26,7 +26,7 @@ export default function Home() {
         <SearchBar/>
       </section>
 
-      <section id="top-picks-section" className='max-w-7xl bg-black/90 m-auto w-full md:p-8 rounded-xl shadow-md shadow-black/40 flex-col'>
+      <section id="top-picks-section" className='max-w-7xl bg-black/90 m-auto w-full md:p-8 rounded-xl shadow-md shadow-black/40 flex'>
         <div className="lg:p-8 pb-14 flex flex-col gap-5">
           <div className="p-8">
             <h1 className="text-3xl text-white flex gap-2 pb-2" > <FaFireAlt className="opacity-80 fill-vermilion-400"/> Trending</h1>

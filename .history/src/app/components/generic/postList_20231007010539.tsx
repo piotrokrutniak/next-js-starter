@@ -14,12 +14,9 @@ export default function PostList(){
     const [count, setCount] = useState<number>(0)
     useEffect(() => {
         GetPosts(page)
-            .then(x => {
-                setPosts([...x.body]); 
-                setCount(Number.parseInt(x.count)); 
-                return x
-            })
-            .then((x) => setPages([...GeneratePages(page, Number.parseInt(x.count))]))
+            .then(x => {setPosts([...x.body]); setCount(Number.parseInt(x.count))})
+            .then(() => setPages([...GeneratePages(page, count)]))
+        
     }, [page])
     
     return(
@@ -74,16 +71,18 @@ function GeneratePages(page: number, count: number){
     if(page>3){
         start = page - 2
     }
-    if(maxPage - page < 3){
-        start = maxPage - 4
-    }
 
     let i = start
 
     while(i < start + 5){
-        pages.push(i)
+        i <= maxPage ? pages.push(i) : pages.unshift(maxPage - start + 3)
+
+        console.log(pages)
+
         i++
     }
+    
+    //pages.sort()
 
     return pages
 }

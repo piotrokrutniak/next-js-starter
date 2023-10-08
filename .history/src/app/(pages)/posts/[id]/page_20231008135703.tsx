@@ -1,5 +1,4 @@
 "use client"
-import CommentsSection from "@/app/components/posts/commentSection";
 import GetAlbumById from "@/app/integration/jsonApi/getAlbumById";
 import GetAlbumPhotos from "@/app/integration/jsonApi/getAlbumPhotos";
 import GetPostById from "@/app/integration/jsonApi/getPostById";
@@ -57,14 +56,13 @@ export default function UserPage(pageData: {params: {id: number}, searchParams: 
                     </div>
                 </Link>
             </div>
-            <div id="photo-section" className="w-full h-full sm:h-screen-1/2 aspect-square relative">
+            <div id="photo-section" className="w-full h-full sm:h-screen-2/3 aspect-square relative">
                 <Image layout="fill" objectFit="contain" src={selectedPhoto?.url ?? ""} alt="Album thumbnail" className="aspect-square h-full"/>
             </div>
-            <div className="p-4 md:p-8 flex flex-col gap-4">
+            <div className="p-4 flex flex-col gap-4">
                 <p className="capitalize-first font-bold">{post?.title}</p>
                 <p className="opacity-70">{post?.body}</p>
             </div>
-            {post && <CommentsSection post={post}/>}
         </section>
     )
 }   

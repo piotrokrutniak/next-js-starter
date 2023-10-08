@@ -1,11 +1,15 @@
 "use client";
 import Image from "next/image"
 import { FaCommentAlt } from 'react-icons/fa'
-import { useEffect, useState } from "react"
-import { Photo, Post, User } from "@/app/types";
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { Comment, Photo, Post, User } from "@/app/types";
 import GetUser from "@/app/integration/jsonApi/getUser";
 import Link from "next/link";
 import GetPostThumbnail from "@/app/integration/jsonApi/getPostThumbnail";
+import GetCommentsByPostId from "@/app/integration/jsonApi/getPostComments";
+import { BsArrowClockwise, BsReply, BsSend, BsSendDash, BsSendFill, BsX } from "react-icons/bs";
+import Button from "../generic/button";
+import FormInput from "../generic/formInput";
 import CommentsSection from "./commentSection";
 
 export function PostItem({post}:{post: Post}){

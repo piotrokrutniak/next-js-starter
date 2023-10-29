@@ -1,4 +1,5 @@
-import { FaStar, FaStarHalfAlt, FaRegStar} from 'react-icons/fa'
+import { FaStar, FaStarHalf, FaStarHalfAlt, FaRegStar} from 'react-icons/fa'
+import { IconType } from 'react-icons'
 
 export default function Rating({rating = 0,}: {rating: number | undefined | void}){
     const defaultRating: boolean[] = [false, false, false, false, false]

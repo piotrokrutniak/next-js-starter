@@ -6,17 +6,9 @@ import Image from "next/image";
 
 import FormPopup from "../../generic/formPopup";
 
-export default function ImageUploadPopUp({ setUploadOpen, uploadOpen, ImageUploadDiscard, SaveThumbnail, fileInput, TriggerFileInput, HandleFileChange, fileToUpload, setFileToUpload } : { 
-    setUploadOpen: Dispatch<SetStateAction<boolean>>; 
-    uploadOpen: boolean; 
-    ImageUploadDiscard(): void; 
-    SaveThumbnail(): void; fileInput: 
-    MutableRefObject<HTMLInputElement | null>; 
-    TriggerFileInput(): void; 
-    HandleFileChange(event: any): void; 
-    fileToUpload: FileOrUndefined; 
-    setFileToUpload: (value: SetStateAction<FileOrUndefined>) => void; 
-})
+export default function ImageUploadPopUp({ setUploadOpen, uploadOpen, ImageUploadDiscard, SaveThumbnail, fileInput, TriggerFileInput, HandleFileChange, fileToUpload, setFileToUpload }: 
+    { setUploadOpen: Dispatch<SetStateAction<boolean>>; uploadOpen: boolean; ImageUploadDiscard(): void; SaveThumbnail(): void; fileInput: MutableRefObject<HTMLInputElement | null>; TriggerFileInput(): void; 
+    HandleFileChange(event: any): void; fileToUpload: FileOrUndefined; setFileToUpload: (value: SetStateAction<FileOrUndefined>) => void; })
 {
     return(
         <FormPopup className="w-112" headerText="Upload Image" uploadFunction={() => console.log("click")} setPopUpOpen={setUploadOpen} popupOpen={uploadOpen} 
